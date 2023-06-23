@@ -7,25 +7,26 @@ LDLIBS=-lz -lmpg123
 LDFLAGS=
 LDFLAGS_RELEASE=-s -Os
 BINARY=projectorrays
+LIB_BINARY=libprojectorrays.a
 
 ifeq ($(OS),Windows_NT)
 # shlwapi is required by mpg123
 	LDLIBS+=-lshlwapi
 	LDFLAGS+=-static -static-libgcc
 	BINARY=projectorrays.exe
+	LIB_BINARY=projectorrays.lib
 endif
 
 FONTMAPS = $(wildcard fontmaps/*.txt)
 FONTMAP_HEADERS = $(patsubst %.txt,%.h,$(FONTMAPS))
 
 .PHONY: all
-all: $(BINARY)
+all: $(BINARY) $(LIB_BINARY)
 
 fontmaps/%.h: $(patsubst %.h,%.txt,$@)
 	xxd -i $(patsubst %.h,%.txt,$@) > $@
 
-OBJS = \
-	src/main.o \
+LIB_OBJS = \
 	src/common/codewriter.o \
 	src/common/fileio.o \
 	src/common/json.o \
@@ -43,6 +44,10 @@ OBJS = \
 	src/director/sound.o \
 	src/director/subchunk.o \
 	src/director/util.o
+
+OBJS = \
+	src/main.o \
+	$(LIB_OBJS)
 
 src/director/fontmap.o: $(FONTMAP_HEADERS)
 
